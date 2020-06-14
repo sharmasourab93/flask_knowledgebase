@@ -70,6 +70,7 @@ The packages to execute the application as listed in `requirements.txt` are as b
         eng-dictionary==0.0.3
         PyYaml==5.3.1
         mysql-connector-python-rf==2.2.2
+	gunicorn==20.0.4
     ```
 
 

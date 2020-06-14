@@ -41,10 +41,6 @@ class Dictionary(db.Model):
     word = db.Column(db.String(50), nullable=False)
     meaning = db.Column(db.String(100))
     
-    def __str__(self):
-        return jsonify({"id": self.id,
-                "word": self.word,
-                "meaning": self.meaning})
 
 
 @flask_app.route("/", methods=['GET'])
