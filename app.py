@@ -54,7 +54,7 @@ def index():
     
     if len(result) == 0:
         status_code = 404
-        message = "No Entries Found"
+        message = "Entry Not  Found"
         return make_response(jsonify(message), status_code)
     
     new_result = [{"id": i.id, "word": i.word, "meaning": i.meaning}
@@ -80,7 +80,6 @@ def get_id(id: int):
 @flask_app.route("/by_word/<word>", methods=['GET'])
 def get_by_word(word: str):
     """To get Entry by Unique Word"""
-    print("Get_by_word")
     result = Dictionary.query.filter(Dictionary.word==word).first()
     if result is None:
         return make_response(jsonify("No Entry Found"), 404)
