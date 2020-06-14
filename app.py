@@ -54,7 +54,7 @@ def index():
     
     if len(result) == 0:
         status_code = 404
-        message = "No Entries Found"
+        message = "Entry Not  Found"
         return make_response(jsonify(message), status_code)
     
     new_result = [{"id": i.id, "word": i.word, "meaning": i.meaning}
