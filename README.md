@@ -32,7 +32,7 @@ The application should implement `unittest`.
 
 The application should be delivered as a `Docker` container.
 
-__
+___
 
 ## Solution
 
@@ -70,9 +70,8 @@ The packages to execute the application as listed in `requirements.txt` are as b
         eng-dictionary==0.0.3
         PyYaml==5.3.1
         mysql-connector-python-rf==2.2.2
-	gunicorn==20.0.4
+	    gunicorn==20.0.4
     ```
-
 
 One of the files in the root directory is `wsgi.py`, which looks like as below: 
 
@@ -153,9 +152,9 @@ The expectations were implemented in the following manner:
     This method takes only the `<id>` which is expected to be an integer.   
     And after the query is filtered based on the integer id, the filtered entry is removed from the database.
     
+___    
     
-    
-### Docker Components 
+## Docker Components 
 
 A `Dockerfile` exists in the root directory which is utilitzed to build and run as a container.
 
@@ -195,6 +194,17 @@ The Dockerfile is first built using the following command :
 
    `--detach` runs the container in the background. 
    
+The built docker image can be uploaded to the [dockerhub](hub.docker.com).   
+
+The preconditions ofcourse are: 
+
+1. Having an account on Dockerhub
+2. The docker account must be logged into, on the working machine.  
+3. Tag & Push the docker image to Dockerhub as referred in [this document](https://docs.docker.com/docker-hub/repos/).
+
+
+The Docker Image for this application `flaskkb:1.1` on docker hub can be found here: [flaskkb](https://hub.docker.com/repository/docker/sharmasourab93/flaskkb) 
+
 
 ### Improvements 
 
