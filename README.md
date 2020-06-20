@@ -10,7 +10,9 @@ A Sample Flask project to explore
     - As standard for Improvization On Potential Flask Application 
     - A Docker Container to Execute the Application
     
---
+---
+
+
 ## Problem Statement
 
 **Tech Stack** : Python3 + Flask + MySQL 
@@ -44,55 +46,73 @@ The Implementation of `Docker` container is explained in the Docker Components s
 
 ### File Structure 
     
-    ```
-        ./flask_knowledgebase/
-        |-- Dockerfile
-        |-- wsgi.py
-        |-- app.py
-        |-- config.yaml
-        |-- init_db.py
-        |-- load_configs.py
-        |-- requirements.txt
-        |-- venv/
-        `-- README.md
-    ```
+```
+    ./flask_knowledgebase/
+    |-- run.py
+    |-- flask_kb/
+    |   |-- __init__.py
+    |   |-- models/
+    |   |   |-- __init__.py
+    |   |   |-- dict_table.py
+    |   |   `-- users.py
+    |   |
+    |   |-- configs/
+    |   |   |-- configs.yaml
+    |   |   |-- load_configs.py
+    |   `-- routes.py
+    |
+    |-- tests/
+    |   |-- test_conn.py
+    |   |-- test_routes.py
+    |   `-- test_db.py
+    |
+    |-- Dockerfile
+    |-- requirements.txt
+    |-- venv/                   # Virtual Environment 
+    |                           # Marked as ignored in .gitignore file
+    |-- .gitignore
+    `-- README.md
+```
 
 
 The packages to execute the application as listed in `requirements.txt` are as below: 
 
-    ```
-        sqlalchemy
-        flask==1.1.2
-        flask_sqlalchemy==2.4.3
-        werkzeug==0.16.1
-        requests==2.23.0
-        bs4==0.0.1
-        eng-dictionary==0.0.3
-        PyYaml==5.3.1
-        mysql-connector-python-rf==2.2.2
-	    gunicorn==20.0.4
-    ```
+```
+    sqlalchemy==1.3.17
+    flask==1.1.2
+    flask_sqlalchemy==2.4.3
+    werkzeug==0.16.1
+    requests==2.23.0
+    bs4==0.0.1
+    eng-dictionary==0.0.3
+    PyYaml==5.3.1
+    mysql-connector-python-rf==2.2.2
+    gunicorn==20.0.4
+```
 
-One of the files in the root directory is `wsgi.py`, which looks like as below: 
+One of the files in the root directory is `run.py`, which looks like as below: 
 
-    ```python 
-        from app import flask_app
-        
-        application = flask_app
-        
-        
-        if __name__ == '__main__':
-            application.run()
-    ```
-   This modification was done to host the application on the Gunicorn server. `gunicorn` can be executed like a linux command and it takes in the `wsgi.py` as an argument along with bind and workers as below. 
-   
-    ``` gunicorn -w 4 --bind 0.0.0.0:5000 wsgi ```
+```python 
+    from app import flask_app as application
     
-   The `gunicorn` server binds the host and port of the server along with the variable `application` to run in the `wsgi.py` which it looks up by default. `flask_app` is the Flask application component which is imported from `app.py`. `app.py` contains SQLAlchemy DB components and the core Flask App components. 
+    
+    if __name__ == '__main__':
+        application.run()
+```
+
+To host it on Gunicorn server  
    
-   In later revisions, these will be segrated into separate modules or improvized along with further extensions. 
+    gunicorn -w 4 --bind 0.0.0.0:5000 run
+ 
+
+`flask_app` is the Flask application component which is imported from the module `flask_kb` as `application`.  
+`flask_kb/models` has schema components.  
+`flask_kb/configs` holds the configs to connect to the db. 
 
 
+___
+
+### Routes Explained
 The explanation below makes use of key word like `<IP-address>` which is the IP address utilized by the application to make REST calls.  
 The expectations were implemented in the following manner: 
 
@@ -154,62 +174,64 @@ The expectations were implemented in the following manner:
     
 ___    
     
-## Docker Components 
+## Docker Components Explained
 
 A `Dockerfile` exists in the root directory which is utilitzed to build and run as a container.
 
 The docker file is written as below: 
 
-    ```
-        FROM python:latest
+```
+    FROM python:latest
+    WORKDIR /src/
 
-        WORKDIR /src/
+    ENV PYTHONDONTWRITEBYTECODE 1
+    ENV PYTHONBUFFERED 1
 
-        ENV PYTHONDONTWRITEBYTECODE 1
-        ENV PYTHONBUFFERED 1
+    RUN pip install --upgrade pip
+    COPY requirements.txt /src/requirements.txt
+    RUN pip install -r requirements.txt
 
+    COPY run.py src/.
+    COPY flask_kb/. src/flask_kb/.
+    COPY . .
+    
+    ENV PYTHONPATH "${PYTHONPATH}:/src/flask_kb/"
 
-        RUN pip install --upgrade pip
-        COPY app.py /src/.
-        COPY . .
-        COPY wsgi.py /src/.
-        COPY load_configs.py /src/.
-        COPY requirements.txt /src/requirements.txt
-        COPY config.yaml /src/.
-
-        RUN pip install -r requirements.txt
-
-        CMD ["gunicorn", "--bind", "0.0.0.0:5000","wsgi", "-w", "1"]
-    ``` 
+    CMD ["gunicorn", "--bind", "0.0.0.0:5000","run", "-w", "1"]
+``` 
     
 The dockerfile transfers all the necessary components of the application into the docker image and hosts the server on [Gunicorn](https://gunicorn.org/).
 
+
 The Dockerfile is first built using the following command : 
     
-    ``` docker build -t flaskkb:1.0 . ```
+    docker build -t flaskkb:X.X 
 
-   This command builds the dockerfile into an image. Now to run the image as a container the image name `flaskkb:1.0` is used to run as below:
+
+This command builds the dockerfile into an image. Now to run the image as a container the image name `flaskkb:1.0` is used to run as below:
    
-    ``` docker run --detach -p 5000:5000 flaskkb:1.0 ```
+    docker run --detach -p 5000:5000 flaskkb:X.X
 
    `--detach` runs the container in the background. 
-   
+
+*Note: X.X refers to incremental Verison Sequences*   
+
+
 The built docker image can be uploaded to the [dockerhub](hub.docker.com).   
 
-The preconditions ofcourse are: 
-
-1. Having an account on Dockerhub
+The preconditions ofcourse are:  
+1. Having an account on Dockerhub  
 2. The docker account must be logged into, on the working machine.  
-3. Tag & Push the docker image to Dockerhub as referred in [this document](https://docs.docker.com/docker-hub/repos/).
+3. Tag & Push the docker image to Dockerhub as referred in [this document](https://docs.docker.com/docker-hub/repos/).  
 
 
-The Docker Image for this application `flaskkb:1.1` on docker hub can be found here: [flaskkb](https://hub.docker.com/repository/docker/sharmasourab93/flaskkb) 
+The Docker Image for this application `flaskkb:X.X` on docker hub can be found here: [flaskkb](https://hub.docker.com/repository/docker/sharmasourab93/flaskkb)  
+Similarly, the image is uploaded on github packages here: [flaskkb](https://github.com/sharmasourab93/flask_knowledgebase/packages)
 
 
 ### Improvements 
 
 1. Adding Security Features/ Extending with `flask_login`. 
 2. Extending Docker with `minikube` and exploring `Kubernetes` components.
-3. Deployment of the application server using [Nginx](https://www.nginx.com/). # Need exploration on this which will be explained once done.
-4. Segragtion of Model Components and Flask App components. 
-5. Writing unittests
+3. Deployment of the application server using [Nginx](https://www.nginx.com/).
+4. Writing unittests

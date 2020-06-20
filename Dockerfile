@@ -7,13 +7,13 @@ ENV PYTHONBUFFERED 1
 
 
 RUN pip install --upgrade pip
-COPY app.py /src/.
-COPY . . 
-COPY wsgi.py /src/.
-COPY load_configs.py /src/.
 COPY requirements.txt /src/requirements.txt
-COPY config.yaml /src/. 
+RUN pip install -r requirements.txt
 
-RUN pip install -r requirements.txt 
+COPY run.py src/.
+COPY flask_kb/. src/flask_kb/.
+COPY . .
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000","wsgi", "-w", "1"]
+ENV PYTHONPATH "${PYTHONPATH}:/src/flask_kb/"
+
+CMD ["gunicorn", "--bind", "0.0.0.0:5000","run", "-w", "1"]
