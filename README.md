@@ -247,6 +247,7 @@ This command builds the dockerfile into an image. Now to run the image as a cont
 *Note: X.X refers to incremental Verison Sequences*   
 
 
+###### Pushing Docker Images to Docker Hub
 The built docker image can be uploaded to the [dockerhub](http://hub.docker.com).   
 
 The preconditions ofcourse are:  
@@ -256,12 +257,26 @@ The preconditions ofcourse are:
 
 
 The Docker Image for this application `flaskkb:X.X` on docker hub can be found here: [flaskkb](https://hub.docker.com/repository/docker/sharmasourab93/flaskkb)  
-Similarly, the image is uploaded on github packages here: [flaskkb](https://github.com/sharmasourab93/flask_knowledgebase/packages)
+
+
+###### Pushing Docker Images to Github Packages
+
+After building the image and verifying it, the given steps will upload the image to github.
+
+1. Ensure you have a Github Auth Token to authenticate your docker github. 
+     ```cat ~/GH_TOKEN.txt | docker login docker.pkg.github.com -u sharmasourab93 --password-stdin```  
+2. Use the following command to tag the latest version of the image on Github
+      ```docker tag IMAGE_ID docker.pkg.github.com/sharmasourab93/eng_dictionary/IMAGE_NAME:VERSION```
+3. Then Use the command given below to push the latest version of the image on Github
+      ```docker push docker.pkg.github.com/sharmasourab93/eng_dictionary/IMAGE_NAME:VERSION```  
+
+The uploaded image is on github packages here: [flaskkb](https://github.com/sharmasourab93/flask_knowledgebase/packages)
 
 
 ### Improvements 
 1. ~~Structuring the Package/App~~
 2. ~~Adding Security Features/ Extending with `flask_login`.~~
 3. Writing unittests 
-4. Deployment of the application server using [Nginx](https://www.nginx.com/).
-5. Extending Docker with `minikube` and exploring `Kubernetes` components.
+4. Enabling Logger
+5. Deployment of the application server using [Nginx](https://www.nginx.com/).
+6. Extending Docker with `minikube` and exploring `Kubernetes` components.
