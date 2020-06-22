@@ -264,10 +264,15 @@ The Docker Image for this application `flaskkb:X.X` on docker hub can be found h
 After building the image and verifying it, the given steps will upload the image to github.
 
 1. Ensure you have a Github Auth Token to authenticate your docker github. 
+
      ```cat ~/GH_TOKEN.txt | docker login docker.pkg.github.com -u sharmasourab93 --password-stdin```  
+
 2. Use the following command to tag the latest version of the image on Github
+
       ```docker tag IMAGE_ID docker.pkg.github.com/sharmasourab93/eng_dictionary/IMAGE_NAME:VERSION```
+
 3. Then Use the command given below to push the latest version of the image on Github
+
       ```docker push docker.pkg.github.com/sharmasourab93/eng_dictionary/IMAGE_NAME:VERSION```  
 
 The uploaded image is on github packages here: [flaskkb](https://github.com/sharmasourab93/flask_knowledgebase/packages)
