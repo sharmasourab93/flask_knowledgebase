@@ -47,31 +47,18 @@ The Implementation of `Docker` container is explained in the Docker Components s
 ### File Structure 
     
 ```
-    ./flask_knowledgebase/
-    |-- run.py
-    |-- flask_kb/
-    |   |-- __init__.py
-    |   |-- models/
-    |   |   |-- __init__.py
-    |   |   |-- dict_table.py
-    |   |   `-- users.py
-    |   |
-    |   |-- configs/
-    |   |   |-- configs.yaml
-    |   |   |-- load_configs.py
-    |   `-- routes.py
-    |
-    |-- tests/
-    |   |-- test_conn.py
-    |   |-- test_routes.py
-    |   `-- test_db.py
-    |
-    |-- Dockerfile
-    |-- requirements.txt
-    |-- venv/                   # Virtual Environment 
-    |                           # Marked as ignored in .gitignore file
-    |-- .gitignore
-    `-- README.md
+    flask==1.1.2
+    werkzeug==0.16.1
+    flask_sqlalchemy==2.4.3
+    Flask-Login==0.5.0
+    Flask-Bcrypt==0.7.1
+    gunicorn==20.0.4
+    mysql-connector-python-rf==2.2.2
+    sqlalchemy==1.3.17
+    PyYaml==5.3.1
+    bs4==0.0.1
+    eng-dictionary==0.0.3
+
 ```
 
 
@@ -167,11 +154,54 @@ The expectations were implemented in the following manner:
  
 6. **Delete a Value**
     
-    ```[DELETE] http//<IP-address>:5000/<id>```
+    ```[DELETE] http://<IP-address>:5000/<id>```
     
     This method takes only the `<id>` which is expected to be an integer.   
     And after the query is filtered based on the integer id, the filtered entry is removed from the database.
+
+7. **Register**
     
+    ```[POST] http://<IP-address>:5000/register```  
+    
+    This method registers a user to access resources.   
+    The pre-condition to register is that the user must not be logged-in and the user must not be already registered.  
+    
+    This method takes JSON parameters in the format as below: 
+    
+    ```json
+        {
+          "user": "username", 
+          "password": "password",
+          "email": "user@email.com"
+        } 
+    ```
+
+8. **Login**
+
+    ```[POST] http://<IP-address>:5000/login```
+    
+    This method lets you login with a user and password passed in the JSON parameter. 
+
+    ```json
+        {
+          "user": "username", 
+          "password": "password"
+        } 
+    ```
+    The only condition here is that the user must be a registered to be able to access resource. 
+  
+9. **Logout**
+
+    ```[GET] http://<IP-Address>:5000/logout```  
+    
+    This method lets you logout from the logged in session. 
+    
+10. **Logged In**
+    
+     ```[GET] http://<IP-Address>:5000/loggedin```  
+     
+     This method lets you know the current logged in user, else No User.  
+     
 ___    
     
 ## Docker Components Explained
@@ -197,7 +227,7 @@ The docker file is written as below:
     
     ENV PYTHONPATH "${PYTHONPATH}:/src/flask_kb/"
 
-    CMD ["gunicorn", "--bind", "0.0.0.0:5000","run", "-w", "1"]
+    CMD ["gunicorn", "--bind", "0.0.0.0:5000", "run", "-w", "1"]
 ``` 
     
 The dockerfile transfers all the necessary components of the application into the docker image and hosts the server on [Gunicorn](https://gunicorn.org/).
@@ -208,7 +238,7 @@ The Dockerfile is first built using the following command :
     docker build -t flaskkb:X.X 
 
 
-This command builds the dockerfile into an image. Now to run the image as a container the image name `flaskkb:1.0` is used to run as below:
+This command builds the dockerfile into an image. Now to run the image as a container the image name `flaskkb:X.X` is used to run as below:
    
     docker run --detach -p 5000:5000 flaskkb:X.X
 
@@ -217,7 +247,7 @@ This command builds the dockerfile into an image. Now to run the image as a cont
 *Note: X.X refers to incremental Verison Sequences*   
 
 
-The built docker image can be uploaded to the [dockerhub](hub.docker.com).   
+The built docker image can be uploaded to the [dockerhub](http://hub.docker.com).   
 
 The preconditions ofcourse are:  
 1. Having an account on Dockerhub  
@@ -230,8 +260,8 @@ Similarly, the image is uploaded on github packages here: [flaskkb](https://gith
 
 
 ### Improvements 
-
-1. Adding Security Features/ Extending with `flask_login`. 
-2. Extending Docker with `minikube` and exploring `Kubernetes` components.
-3. Deployment of the application server using [Nginx](https://www.nginx.com/).
-4. Writing unittests
+1. ~~Structuring the Package/App~~
+2. ~~Adding Security Features/ Extending with `flask_login`.~~
+3. Writing unittests 
+4. Deployment of the application server using [Nginx](https://www.nginx.com/).
+5. Extending Docker with `minikube` and exploring `Kubernetes` components.
