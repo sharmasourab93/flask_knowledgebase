@@ -10,8 +10,8 @@ RUN pip install --upgrade pip
 COPY requirements.txt /src/requirements.txt
 RUN pip install -r requirements.txt
 
-COPY run.py src/.
-COPY flask_kb/. src/flask_kb/.
+COPY run.py /src/.
+COPY flask_kb/. /src/flask_kb/.
 COPY . .
 
 ENV PYTHONPATH "${PYTHONPATH}:/src/flask_kb/"
