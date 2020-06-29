@@ -6,7 +6,7 @@ yaml.warnings({'YAMLLoadWarning': False})
 
 def get_configs():
     # configs = None
-    with open(path.join('flask_kb/configs/', 'configs.yaml'), 'r') as stream:
+    with open(path.join('flask_kb/configs/', 'sql_configs.yaml'), 'r') as stream:
         configs = yaml.load(stream)
     
     host, port = configs['host'], configs['port']

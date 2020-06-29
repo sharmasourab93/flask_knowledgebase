@@ -1,0 +1,35 @@
+---
+version: 1
+disable_existing_loggers: False
+formatters:
+    simple:
+        format: "[%(levelname)s] Module Name: %(name)s: \n\t %(message)s"
+        datefmt: "%d/%m/%y %H:%M:%S"
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: WARNING
+        formatter: simple
+        stream: ext://sys.stdout
+    
+    # Default log file gets written into a file inside the project folder
+    debug_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: WARNING
+        formatter: simple
+        # filename: G:\Code\Projects\flask_dictionary\flask_kb\log\flask-kb.log
+        filename: /src/flask_kb/log/flask-kb.log
+        maxBytes: 10485760 # 10MB
+        backupCount: 20
+        encoding: utf8
+
+loggers:
+    my_module:
+        level: WARNING
+        handlers: [console]
+        propagate: no
+
+root:
+    level: WARNING
+    handlers: [console, debug_file_handler]

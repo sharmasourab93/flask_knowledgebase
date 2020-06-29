@@ -16,7 +16,11 @@ Configurations are handled by `load_configs.py` which seeks manual
 inputs from `config.yaml`
 """
 from flask_kb import flask_app as application
+from flask_kb.log.log_configurator import LogConfigurator
 
 
 if __name__ == '__main__':
+    LogConfigurator.setup_logging()
+    logger = LogConfigurator.get_logger(__name__)
+    logger.info("Server Started")
     application.run(host='0.0.0.0', port=5000)
