@@ -58,7 +58,14 @@ The Implementation of `Docker` container is explained in the Docker Components s
     |   |
     |   |-- configs/
     |   |   |-- configs.yaml
-    |   |   |-- load_configs.py
+    |   |   `-- load_configs.py
+    |   |
+    |   |-- log/
+    |   |   |-- __init__.py
+    |   |   |-- configuration_loader.py
+    |   |   |-- log_configurator.py # the module which holds 
+    |   |   |                       # LogConfigurator class
+    |   |   `-- logger_test.py      # Testing Logger
     |   `-- routes.py
     |
     |-- tests/
