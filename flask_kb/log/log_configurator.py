@@ -57,8 +57,10 @@ class LogConfigurator:
             logging.basicConfig(level=default_level)
         else:
             logging.debug("Log configuration file found: " + path)
+            config = None
             with open(path, 'rt') as f:
                 config = yaml.safe_load(f.read())
+            
             logging.config.dictConfig(config)
 
     @staticmethod
