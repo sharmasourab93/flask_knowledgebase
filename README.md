@@ -47,6 +47,44 @@ The Implementation of `Docker` container is explained in the Docker Components s
 ### File Structure 
     
 ```
+    ./flask_knowledgebase/
+    |-- run.py
+    |-- flask_kb/
+    |   |-- __init__.py
+    |   |-- models/
+    |   |   |-- __init__.py
+    |   |   |-- dict_table.py
+    |   |   `-- users.py
+    |   |
+    |   |-- configs/
+    |   |   |-- configs.yaml
+    |   |   `-- load_configs.py
+    |   |
+    |   |-- log/
+    |   |   |-- __init__.py
+    |   |   |-- configuration_loader.py
+    |   |   |-- log_configurator.py # the module which holds 
+    |   |   |                       # LogConfigurator class
+    |   |   `-- logger_test.py      # Testing Logger
+    |   `-- routes.py
+    |
+    |-- tests/
+    |   |-- test_conn.py
+    |   |-- test_routes.py
+    |   `-- test_db.py
+    |
+    |-- Dockerfile
+    |-- requirements.txt
+    |-- venv/                   # Virtual Environment 
+    |                           # Marked as ignored in .gitignore file
+    |-- .gitignore
+    `-- README.md
+```
+
+
+The packages to execute the application as listed in `requirements.txt` are as below: 
+
+``` 
     flask==1.1.2
     werkzeug==0.16.1
     flask_sqlalchemy==2.4.3
@@ -58,23 +96,6 @@ The Implementation of `Docker` container is explained in the Docker Components s
     PyYaml==5.3.1
     bs4==0.0.1
     eng-dictionary==0.0.3
-
-```
-
-
-The packages to execute the application as listed in `requirements.txt` are as below: 
-
-```
-    sqlalchemy==1.3.17
-    flask==1.1.2
-    flask_sqlalchemy==2.4.3
-    werkzeug==0.16.1
-    requests==2.23.0
-    bs4==0.0.1
-    eng-dictionary==0.0.3
-    PyYaml==5.3.1
-    mysql-connector-python-rf==2.2.2
-    gunicorn==20.0.4
 ```
 
 One of the files in the root directory is `run.py`, which looks like as below: 
@@ -282,6 +303,6 @@ The uploaded image is on github packages here: [flaskkb](https://github.com/shar
 1. ~~Structuring the Package/App~~
 2. ~~Adding Security Features/ Extending with `flask_login`.~~
 3. Writing unittests 
-4. Enabling Logger
+4. ~~Enabling Logger~~
 5. Deployment of the application server using [Nginx](https://www.nginx.com/).
 6. Extending Docker with `minikube` and exploring `Kubernetes` components.

@@ -3,6 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from configs.load_configs import CONN_STRING
+from log.log_configurator import LogConfigurator
+
+
+LogConfigurator.setup_logging()
+logger = LogConfigurator.get_logger(__name__)
+logger.info("Initializing Flask-kb")
 
 
 flask_app = Flask(__name__)
