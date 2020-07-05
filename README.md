@@ -41,24 +41,40 @@ ___
 The Application uses `Python3`, `Flask` webframework and `MySQL` database remotely.  
 The API requests and responses makes use of JSON format.  
 The HTTP Protocols namely `GET`, `POST`, `PUT` and `DELETE` are implemented in each of the methods based on functionality.  
-The Implementation of `Docker` container is explained in the Docker Components sub section.  
+The Implementation of `Docker` container is explained in the Docker Components sub section.
 
 
-### File Structure 
+___
+
+## Index
+1. File Structure & Introduction
+2. Routes Explained  
+3. Docker Components Reference
+
+    1. Introduction to Docker Components
+    2. Pushing Docker Images to Docker Hub
+    3. Pushing Docker Images to GitHub Packages
+    
+4. Integration With Nginx
+5. Improvements
+
+
+___
+
+
+### File Structure & Introduction
+
+The [file structure](#file-structure--introduction) of the project is as given below.
     
 ```
     ./flask_knowledgebase/
-    |-- run.py
     |-- flask_kb/
     |   |-- __init__.py
-    |   |-- models/
-    |   |   |-- __init__.py
-    |   |   |-- dict_table.py
-    |   |   `-- users.py
-    |   |
     |   |-- configs/
-    |   |   |-- configs.yaml
-    |   |   `-- load_configs.py
+    |   |   |-- __init__.py
+    |   |   |-- load_configs.py
+    |   |   |-- sql_configs.yaml
+    |   |   `-- logging.yml
     |   |
     |   |-- log/
     |   |   |-- __init__.py
@@ -66,23 +82,38 @@ The Implementation of `Docker` container is explained in the Docker Components s
     |   |   |-- log_configurator.py # the module which holds 
     |   |   |                       # LogConfigurator class
     |   |   `-- logger_test.py      # Testing Logger
-    |   `-- routes.py
+    |   |
+    |   |-- models/
+    |   |   |-- __init__.py
+    |   |   |-- dict_table.py
+    |   |   `-- users.py
+    |   |
+    |   |-- routes.py
+    |   |-- run.py
+    |   |-- requirements.txt
+    |   `-- Dockerfile              # Dockerfile for initiating Flask-KB application
+    |
+    |-- nginx/
+    |   |-- nginx.conf
+    |   |-- project.conf
+    |   `-- Dockerfile              # Dockerfile for initiating Nginx-Container
     |
     |-- tests/
-    |   |-- test_conn.py
-    |   |-- test_routes.py
-    |   `-- test_db.py
+    |   |-- base.py                 # Base for all the test cases.
+    |   |-- test_routes.py 
+    |   `-- test_sessions.py
     |
-    |-- Dockerfile
-    |-- requirements.txt
-    |-- venv/                   # Virtual Environment 
-    |                           # Marked as ignored in .gitignore file
-    |-- .gitignore
-    `-- README.md
+    |-- docker-compose.yml          # docker-compose will build the Dockerfile(s) in nginx/ & flask_kb/
+    |-- run_docker.sh               # Shell script to execute Docker commands
+    |-- README.md
+    |-- .gitignore                  # Git ignore file.
+    |
+    `-- venv/                       # Virtual Environment 
+                                    # Marked as ignored in .gitignore file
 ```
 
 
-The packages to execute the application as listed in `requirements.txt` are as below: 
+The python packages required to execute the application as listed in `requirements.txt` are as below: 
 
 ``` 
     flask==1.1.2
@@ -115,13 +146,15 @@ To host it on Gunicorn server
 
 `flask_app` is the Flask application component which is imported from the module `flask_kb` as `application`.  
 `flask_kb/models` has schema components.  
-`flask_kb/configs` holds the configs to connect to the db. 
+`flask_kb/configs` holds the configs to connect to the db.  
+`flask_kb/log` holds the logger modulels & keeps `flask-kb.log` (an event log for the flask application).  
 
 
 ___
 
+
 ### Routes Explained
-The explanation below makes use of key word like `<IP-address>` which is the IP address utilized by the application to make REST calls.  
+The explanation below makes use of key word like `<IP-address>` which is the IP address utilized by the application to make [REST calls](#routes-explained).  
 The expectations were implemented in the following manner: 
 
 1. **Get all the Knowledge Items**
@@ -225,36 +258,80 @@ The expectations were implemented in the following manner:
      
 ___    
     
-## Docker Components Explained
+### Docker Components Explained
 
 A `Dockerfile` exists in the root directory which is utilitzed to build and run as a container.
 
-The docker file is written as below: 
+The [docker file](#docker-components-explained) written for the `flask_kb` is as given below: 
 
-```
-    FROM python:latest
-    WORKDIR /src/
+```Dockerfile
+FROM python:latest
 
-    ENV PYTHONDONTWRITEBYTECODE 1
-    ENV PYTHONBUFFERED 1
+WORKDIR /src/. 
 
-    RUN pip install --upgrade pip
-    COPY requirements.txt /src/requirements.txt
-    RUN pip install -r requirements.txt
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONBUFFERED 1
 
-    COPY run.py src/.
-    COPY flask_kb/. src/flask_kb/.
-    COPY . .
-    
-    ENV PYTHONPATH "${PYTHONPATH}:/src/flask_kb/"
+RUN pip install --upgrade pip
+COPY requirements.txt /src/requirements.txt
+RUN pip install -r requirements.txt 
 
-    CMD ["gunicorn", "--bind", "0.0.0.0:5000", "run", "-w", "1"]
+COPY run.py /src/
+COPY ./configs /src/flask_kb/configs/
+COPY ./routes.py /src/flask_kb/
+COPY ./__init__.py /src/flask_kb/
+COPY ./models /src/flask_kb/models/
+COPY ./log /src/flask_kb/log/
+COPY ./entrypoint.sh /src/
+
+ENV PYTHONPATH "${PYTHONPATH}:/src/flask_kb/"
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "-w", "1", "run", "&"]
 ``` 
     
 The dockerfile transfers all the necessary components of the application into the docker image and hosts the server on [Gunicorn](https://gunicorn.org/).
 
+On the `nginx` folder, exists a Dockerfile which is as given below: 
 
-The Dockerfile is first built using the following command : 
+```Dockerfile
+FROM nginx:1.15.8
+
+RUN rm /etc/nginx/nginx.conf
+RUN rm /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/
+COPY project.conf /etc/nginx/conf.d/
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+This `Dockerfile` sets the nginx context on to a Docker container. 
+
+
+The Dockerfile(s) in the respective folders are composed using a docker-compose.   
+Find the `docker-compose.yml` located on the root as given below. 
+
+```docker-compose.yml
+version: '3'
+
+services: 
+  flask_kb: 
+   container_name: flask_kb
+   build: ./flask_kb
+   ports:
+    - "5000:5000"
+   command: gunicorn -b 0.0.0.0:5000 -w 1 run
+
+  nginx:
+   container_name: nginx
+   build: ./nginx
+   ports:
+    - "80:80"
+   depends_on: 
+    - flask_kb
+
+```
+
+The docker-compose handles the Dockerfile in `flask_kb` and `nginx`.
+<!--The Dockerfile is first built using the following command : 
     
     docker build -t flaskkb:X.X 
 
@@ -263,13 +340,28 @@ This command builds the dockerfile into an image. Now to run the image as a cont
    
     docker run --detach -p 5000:5000 flaskkb:X.X
 
-   `--detach` runs the container in the background. 
+   `--detach` runs the container in the background. -->
+
+
+`run_docker.sh` is the shell script to intiate building of docker containers.   
+The script likes as given below: 
+
+```shell script
+#!/bin/bash 
+
+echo "Killing Old Docker Containers"
+docker-compose rm -fs 
+
+echo "Building Docker Containers"
+docker-compose up --build -d
+#docker build -t flaskkb_nginx:1.3 .
+```
 
 *Note: X.X refers to incremental Verison Sequences*   
 
 
-###### Pushing Docker Images to Docker Hub
-The built docker image can be uploaded to the [dockerhub](http://hub.docker.com).   
+##### Pushing Docker Images to Docker Hub
+The built [docker image](#pushing-docker-images-to-docker-hub) can be uploaded to the [dockerhub](http://hub.docker.com).   
 
 The preconditions ofcourse are:  
 1. Having an account on Dockerhub  
@@ -280,9 +372,9 @@ The preconditions ofcourse are:
 The Docker Image for this application `flaskkb:X.X` on docker hub can be found here: [flaskkb](https://hub.docker.com/repository/docker/sharmasourab93/flaskkb)  
 
 
-###### Pushing Docker Images to Github Packages
+##### Pushing Docker Images to Github Packages
 
-After building the image and verifying it, the given steps will upload the image to github.
+After [building the image](#pushing-docker-images-to-github-packages) and verifying it, the given steps will upload the image to github.
 
 1. Ensure you have a Github Auth Token to authenticate your docker github. 
 
@@ -299,10 +391,36 @@ After building the image and verifying it, the given steps will upload the image
 The uploaded image is on github packages here: [flaskkb](https://github.com/sharmasourab93/flask_knowledgebase/packages)
 
 
+___
+
+
+### Integration With Nginx
+[Integration](#integration-with-nginx) with [Nginx](https://www.nginx.com/) is done in the `nginx/` folder.  
+
+The `nginx/` folder contains:  
+
+```tree
+|-- nginx/
+    |   |-- nginx.conf
+    |   |-- project.conf
+    |   `-- Dockerfile  
+```   
+
+The `nginx.conf` file has the necessary configuration for the bringing up the server.   
+The `project.conf` has the configuration set for intergrating with `flask_kb` app and it's endpoint.  
+The `Dockerfile` has the necessary configurations to initiate/start `nginx` server.  
+
+
 ### Improvements 
+The [improvements](#improvements) are being tracked as below:
+
 1. ~~Structuring the Package/App~~
 2. ~~Adding Security Features/ Extending with `flask_login`.~~
-3. Writing unittests 
-4. ~~Enabling Logger~~
-5. Deployment of the application server using [Nginx](https://www.nginx.com/).
-6. Extending Docker with `minikube` and exploring `Kubernetes` components.
+3. ~~Enabling Logger~~
+4. ~~Deployment of the application server using [Nginx](https://www.nginx.com/).~~
+5. Bug fixes with routes.   
+6. Writing unittests.  
+7. Minor Imporvements (if Needed) 
+8. Extending Docker with `minikube` (exploring `Kubernetes` components).
+9. Integrating with Jenkins/CI\CD pipeline is use case identified.
+
