@@ -15,7 +15,7 @@ COPY ./routes.py /src/flask_kb/
 COPY ./__init__.py /src/flask_kb/
 COPY ./models /src/flask_kb/models/
 COPY ./log /src/flask_kb/log/
-COPY ./entrypoint.sh /src/
+# COPY ./entrypoint.sh /src/
 
 ENV PYTHONPATH "${PYTHONPATH}:/src/flask_kb/"
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "-w", "1", "run", "&"]
